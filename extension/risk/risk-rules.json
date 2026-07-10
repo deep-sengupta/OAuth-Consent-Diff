@@ -1,0 +1,22 @@
+{
+  "levels": {
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 4
+  },
+  "expansionWeights": {
+    "low": 1,
+    "medium": 2,
+    "high": 4,
+    "critical": 7
+  },
+  "unusualExpansionThreshold": 3,
+  "criticalCategories": [
+    "Administration",
+    "Infrastructure",
+    "Email",
+    "Files",
+    "Code"
+  ]
+}

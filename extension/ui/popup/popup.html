@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OAuth Consent Diff</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="notice">
+        <p>OAuth Consent Diff is watching supported consent screens and saving history locally.</p>
+        <button id="dismiss-notice" type="button" aria-label="Dismiss">x</button>
+      </section>
+      <section class="hero">
+        <div class="hero-mark">
+          <img src="../../../assets/icons/icon-48.png" alt="">
+        </div>
+        <h1>OAuth Consent Diff</h1>
+        <p>Compare new OAuth scopes against previous requests from the same app.</p>
+      </section>
+      <section class="stats" id="stats"></section>
+      <section class="history-head">
+        <div>
+          <h2>History</h2>
+          <p>Every consent screen saved on this device.</p>
+        </div>
+        <button id="history-refresh" type="button">
+          <span class="button-spinner" aria-hidden="true"></span>
+          <span class="button-label">Refresh</span>
+        </button>
+      </section>
+      <div id="history" class="list history-list"></div>
+      <div class="history-actions">
+        <button id="history-clear" type="button">Clear History</button>
+      </div>
+    </main>
+    <script src="../../shared/constants.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

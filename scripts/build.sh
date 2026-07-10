@@ -1,0 +1,3 @@
+set -eu
+node -e "const fs=require('fs');const required=['manifest.json','extension/background/service-worker.js','extension/content/consent-detector.js','extension/content/scope-extractor.js','extension/content/overlay-injector.js','extension/ui/overlay/overlay.css','extension/ui/overlay/overlay.js','extension/ui/popup/popup.html','extension/ui/popup/popup.js','README.md'];for(const file of required){if(!fs.existsSync(file)||fs.statSync(file).size===0){throw new Error(file+' is missing or empty')}}JSON.parse(fs.readFileSync('manifest.json','utf8'));JSON.parse(fs.readFileSync('extension/scopes/scope-catalog.json','utf8'));JSON.parse(fs.readFileSync('extension/risk/risk-rules.json','utf8'));"
+echo "Build check passed"

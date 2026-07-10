@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "OAuth Consent Diff",
+  "version": "0.1.0",
+  "description": "Shows a local before v/s after OAuth permission diff grouped by risk.",
+  "icons": {
+    "16": "assets/icons/icon-16.png",
+    "32": "assets/icons/icon-32.png",
+    "48": "assets/icons/icon-48.png",
+    "128": "assets/icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "OAuth Consent Diff",
+    "default_popup": "extension/ui/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icons/icon-16.png",
+      "32": "assets/icons/icon-32.png",
+      "48": "assets/icons/icon-48.png",
+      "128": "assets/icons/icon-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "extension/background/service-worker.js"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_idle",
+      "js": [
+        "extension/shared/constants.js",
+        "extension/shared/types.js",
+        "extension/scopes/scope-normalizer.js",
+        "extension/risk/risk-engine.js",
+        "extension/providers/provider-registry.js",
+        "extension/providers/google.js",
+        "extension/providers/github.js",
+        "extension/providers/gitlab.js",
+        "extension/providers/generic.js",
+        "extension/content/consent-detector.js",
+        "extension/content/scope-extractor.js",
+        "extension/ui/overlay/overlay.js",
+        "extension/content/overlay-injector.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "extension/ui/overlay/overlay.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}

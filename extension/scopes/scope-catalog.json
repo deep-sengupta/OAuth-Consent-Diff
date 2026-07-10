@@ -1,0 +1,254 @@
+{
+  "openid": {
+    "provider": "generic",
+    "label": "Sign you in",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Confirms your identity without granting account data access."
+  },
+  "profile": {
+    "provider": "generic",
+    "label": "Basic profile",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your public profile information."
+  },
+  "email": {
+    "provider": "generic",
+    "label": "Email address",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your email address."
+  },
+  "offline_access": {
+    "provider": "generic",
+    "label": "Long-lived access",
+    "category": "Session",
+    "risk": "high",
+    "description": "Allows access after you leave the consent screen."
+  },
+  "google.userinfo.profile": {
+    "provider": "google",
+    "label": "Google profile",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your Google profile details."
+  },
+  "google.userinfo.email": {
+    "provider": "google",
+    "label": "Google email address",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your Google account email address."
+  },
+  "google.drive.metadata.readonly": {
+    "provider": "google",
+    "label": "Drive file metadata",
+    "category": "Files",
+    "risk": "medium",
+    "description": "Sees file names and metadata in Google Drive."
+  },
+  "google.drive.file": {
+    "provider": "google",
+    "label": "App-created Drive files",
+    "category": "Files",
+    "risk": "medium",
+    "description": "Accesses files opened with or created by the app."
+  },
+  "google.drive.readonly": {
+    "provider": "google",
+    "label": "Read Google Drive files",
+    "category": "Files",
+    "risk": "high",
+    "description": "Reads files in Google Drive."
+  },
+  "google.drive": {
+    "provider": "google",
+    "label": "Full Google Drive access",
+    "category": "Files",
+    "risk": "critical",
+    "description": "Sees, edits, creates, and deletes Google Drive files."
+  },
+  "google.gmail.readonly": {
+    "provider": "google",
+    "label": "Read Gmail",
+    "category": "Email",
+    "risk": "high",
+    "description": "Reads Gmail messages and settings."
+  },
+  "google.gmail.send": {
+    "provider": "google",
+    "label": "Send Gmail",
+    "category": "Email",
+    "risk": "high",
+    "description": "Sends email from your Gmail account."
+  },
+  "google.gmail.modify": {
+    "provider": "google",
+    "label": "Manage Gmail",
+    "category": "Email",
+    "risk": "critical",
+    "description": "Reads, changes, and deletes Gmail messages."
+  },
+  "google.calendar.readonly": {
+    "provider": "google",
+    "label": "Read Google Calendar",
+    "category": "Calendar",
+    "risk": "medium",
+    "description": "Reads calendars and events."
+  },
+  "google.calendar.events": {
+    "provider": "google",
+    "label": "Manage calendar events",
+    "category": "Calendar",
+    "risk": "high",
+    "description": "Creates and changes calendar events."
+  },
+  "google.contacts.readonly": {
+    "provider": "google",
+    "label": "Read contacts",
+    "category": "Contacts",
+    "risk": "medium",
+    "description": "Reads names, email addresses, and contact details."
+  },
+  "google.photoslibrary.readonly": {
+    "provider": "google",
+    "label": "Read Google Photos",
+    "category": "Photos",
+    "risk": "medium",
+    "description": "Reads your Google Photos library."
+  },
+  "google.cloud-platform": {
+    "provider": "google",
+    "label": "Google Cloud platform",
+    "category": "Infrastructure",
+    "risk": "critical",
+    "description": "Accesses Google Cloud projects and resources."
+  },
+  "github.read:user": {
+    "provider": "github",
+    "label": "Read GitHub profile",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your GitHub profile information."
+  },
+  "github.user:email": {
+    "provider": "github",
+    "label": "Read GitHub email",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your GitHub email addresses."
+  },
+  "github.public_repo": {
+    "provider": "github",
+    "label": "Public repositories",
+    "category": "Code",
+    "risk": "medium",
+    "description": "Accesses public repositories."
+  },
+  "github.repo": {
+    "provider": "github",
+    "label": "Private repositories",
+    "category": "Code",
+    "risk": "high",
+    "description": "Reads and writes public and private repositories."
+  },
+  "github.workflow": {
+    "provider": "github",
+    "label": "GitHub Actions workflows",
+    "category": "Automation",
+    "risk": "high",
+    "description": "Updates GitHub Actions workflow files."
+  },
+  "github.gist": {
+    "provider": "github",
+    "label": "Gists",
+    "category": "Code",
+    "risk": "medium",
+    "description": "Creates and edits gists."
+  },
+  "github.notifications": {
+    "provider": "github",
+    "label": "Notifications",
+    "category": "Activity",
+    "risk": "low",
+    "description": "Reads notifications."
+  },
+  "github.read:org": {
+    "provider": "github",
+    "label": "Read organizations",
+    "category": "Organizations",
+    "risk": "medium",
+    "description": "Reads organization and team membership."
+  },
+  "github.admin:org": {
+    "provider": "github",
+    "label": "Admin organizations",
+    "category": "Organizations",
+    "risk": "critical",
+    "description": "Manages organizations, teams, and membership."
+  },
+  "github.delete_repo": {
+    "provider": "github",
+    "label": "Delete repositories",
+    "category": "Code",
+    "risk": "critical",
+    "description": "Deletes repositories."
+  },
+  "github.read:packages": {
+    "provider": "github",
+    "label": "Read packages",
+    "category": "Packages",
+    "risk": "low",
+    "description": "Reads GitHub Packages."
+  },
+  "github.write:packages": {
+    "provider": "github",
+    "label": "Publish packages",
+    "category": "Packages",
+    "risk": "high",
+    "description": "Publishes and edits GitHub Packages."
+  },
+  "gitlab.read_user": {
+    "provider": "gitlab",
+    "label": "Read GitLab profile",
+    "category": "Identity",
+    "risk": "low",
+    "description": "Reads your GitLab profile."
+  },
+  "gitlab.read_api": {
+    "provider": "gitlab",
+    "label": "Read GitLab API",
+    "category": "Account",
+    "risk": "high",
+    "description": "Reads data through the GitLab API."
+  },
+  "gitlab.api": {
+    "provider": "gitlab",
+    "label": "Full GitLab API",
+    "category": "Account",
+    "risk": "critical",
+    "description": "Reads and writes data through the GitLab API."
+  },
+  "gitlab.read_repository": {
+    "provider": "gitlab",
+    "label": "Read repositories",
+    "category": "Code",
+    "risk": "high",
+    "description": "Reads Git repositories."
+  },
+  "gitlab.write_repository": {
+    "provider": "gitlab",
+    "label": "Write repositories",
+    "category": "Code",
+    "risk": "high",
+    "description": "Pushes to Git repositories."
+  },
+  "gitlab.sudo": {
+    "provider": "gitlab",
+    "label": "Act as users",
+    "category": "Administration",
+    "risk": "critical",
+    "description": "Performs API actions as another user."
+  }
+}
