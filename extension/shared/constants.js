@@ -3,6 +3,7 @@
   const messages = {
     getProfile: "OCD_GET_PROFILE",
     saveObservation: "OCD_SAVE_OBSERVATION",
+    recordDecision: "OCD_RECORD_DECISION",
     listRecent: "OCD_LIST_RECENT",
     getStats: "OCD_GET_STATS",
     clearHistory: "OCD_CLEAR_HISTORY",
@@ -14,6 +15,17 @@
     medium: { id: "medium", label: "Medium", score: 2 },
     high: { id: "high", label: "High", score: 3 },
     critical: { id: "critical", label: "Critical", score: 4 }
+  };
+  const baselineStates = {
+    new: { id: "new", label: "New" },
+    known: { id: "known", label: "Known" },
+    changed: { id: "changed", label: "Changed" }
+  };
+  const decisions = {
+    approved: "approved",
+    rejected: "rejected",
+    ignored: "ignored",
+    observed: "observed"
   };
   const providerNames = {
     google: "Google",
@@ -80,9 +92,11 @@
     return normalizeText(body.innerText || body.textContent || "").slice(0, 6000);
   }
   root.OAuthConsentDiff = Object.assign(current, {
-    version: "0.1.0",
+    version: "0.2.0",
     messages,
     riskLevels,
+    baselineStates,
+    decisions,
     providerNames,
     utils: Object.assign(current.utils || {}, {
       toArray,
