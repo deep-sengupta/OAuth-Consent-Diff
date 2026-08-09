@@ -1,8 +1,8 @@
 {
   "name": "oauth-consent-diff",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "A local Manifest V3 extension that compares OAuth consent scopes against historic requests.",
+  "description": "A local Manifest V3 extension that compares OAuth consent scopes against trusted application baselines.",
   "scripts": {
     "build": "sh scripts/build.sh",
     "package": "sh scripts/package.sh",
