@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "OAuth Consent Diff",
-  "version": "0.1.0",
-  "description": "Shows a local before v/s after OAuth permission diff grouped by risk.",
+  "version": "0.2.0",
+  "description": "Shows a local OAuth permission diff against trusted application baselines, with semantic risk explanations.",
   "icons": {
     "16": "assets/icons/icon-16.png",
     "32": "assets/icons/icon-32.png",
