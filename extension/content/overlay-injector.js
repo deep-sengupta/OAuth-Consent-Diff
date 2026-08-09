@@ -4,18 +4,25 @@
   let lastFingerprint = "";
   let renderedFingerprint = "";
   let scanTimer = 0;
+  let currentObservationId = "";
+  let currentConsent = null;
+  let currentScopes = [];
   const dismissedFingerprints = new Set();
+
   function isDismissed(fingerprint) {
     return dismissedFingerprints.has(fingerprint);
   }
+
   function markDismissed(fingerprint) {
     dismissedFingerprints.add(fingerprint);
   }
+
   function removeHost() {
     const host = root.document.getElementById("oauth-consent-diff-root");
     if (host) host.remove();
     renderedFingerprint = "";
   }
+
   function send(type, payload) {
     return new Promise((resolve) => {
       if (!root.chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
@@ -31,6 +38,7 @@
       });
     });
   }
+
   function ensureHost() {
     let host = root.document.getElementById("oauth-consent-diff-root");
     if (host) return host.shadowRoot;
@@ -46,59 +54,82 @@
     root.document.documentElement.appendChild(host);
     return shadow;
   }
+
+  async function decide(decision, fingerprint) {
+    const result = await send(messages.recordDecision, {
+      context: currentConsent,
+      currentScopes,
+      observationId: currentObservationId,
+      decision
+    });
+    if (result) {
+      markDismissed(fingerprint);
+      removeHost();
+    }
+  }
+
   async function scan() {
     const consent = app.consentDetector.detect(root.document, root.location);
     if (!consent) {
       removeHost();
       return;
     }
-    const currentScopes = app.scopeExtractor.extract(consent);
-    if (!currentScopes.length) {
+    const scopes = app.scopeExtractor.extract(consent);
+    if (!scopes.length) {
       removeHost();
       return;
     }
-    const fingerprint = app.scopeExtractor.fingerprint(consent, currentScopes);
+    const fingerprint = app.scopeExtractor.fingerprint(consent, scopes);
     if (isDismissed(fingerprint)) {
       removeHost();
       return;
     }
     const profile = await send(messages.getProfile, consent);
-    const previousScopes = profile && profile.lastScopes ? profile.lastScopes : [];
+    const trustedScopes = profile && profile.trustedScopes ? profile.trustedScopes : [];
     const analysis = app.riskEngine.analyze({
       providerId: consent.providerId,
-      currentScopes,
-      previousScopes,
+      currentScopes: scopes,
+      trustedScopes,
       appName: consent.appName
     });
+
+    if (fingerprint !== lastFingerprint) {
+      lastFingerprint = fingerprint;
+      currentConsent = consent;
+      currentScopes = scopes;
+      const saved = await send(messages.saveObservation, {
+        context: consent,
+        currentScopes: scopes,
+        analysis,
+        observedAt: consent.detectedAt
+      });
+      currentObservationId = saved && saved.observation ? saved.observation.id : "";
+    }
+
     if (renderedFingerprint !== fingerprint || !root.document.getElementById("oauth-consent-diff-root")) {
       const shadow = ensureHost();
       app.overlay.render(shadow.querySelector(".ocd-mount"), {
         consent,
         analysis,
         profile,
-        onClose: () => markDismissed(fingerprint)
+        onClose: () => markDismissed(fingerprint),
+        onDecision: (decision) => decide(decision, fingerprint)
       });
       renderedFingerprint = fingerprint;
     }
-    if (fingerprint !== lastFingerprint) {
-      lastFingerprint = fingerprint;
-      await send(messages.saveObservation, {
-        context: consent,
-        currentScopes,
-        analysis,
-        observedAt: consent.detectedAt
-      });
-    }
   }
+
   function schedule() {
     clearTimeout(scanTimer);
     scanTimer = setTimeout(scan, 350);
   }
+
   if (root.document.readyState === "loading") {
     root.document.addEventListener("DOMContentLoaded", schedule, { once: true });
   } else {
     schedule();
   }
+
   const observer = new MutationObserver(schedule);
   observer.observe(root.document.documentElement, { childList: true, subtree: true });
 })(typeof globalThis !== "undefined" ? globalThis : window);
