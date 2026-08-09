@@ -2,7 +2,7 @@
   const app = root.OAuthConsentDiff || {};
   app.storageSchema = {
     dbName: "oauth_consent_diff",
-    version: 1,
+    version: 2,
     stores: {
       profiles: "profiles",
       observations: "observations",
@@ -13,4 +13,4 @@
   if (typeof module !== "undefined" && module.exports) {
     module.exports = app.storageSchema;
   }
-})(typeof globalThis !== "undefined" ? globalThis : window);
+})(typeof globalThis !== "undefined" ? globalThis : self);

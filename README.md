@@ -5,27 +5,96 @@
 <h1 align="center">OAuth Consent Diff</h1>
 
 <p align="center">
-  A local browser extension that watches OAuth consent screens and shows a simple permission diff before you approve access.
+  A local browser security extension that watches OAuth consent screens, compares requests against trusted application baselines, and explains what new permissions can actually do.
 </p>
 
 <p align="center">
-  It compares the scopes an app asks for now with the scopes it asked for before. If an app suddenly asks for more access, the extension highlights the change and groups permissions by risk.
-</p>
-
-<p align="center">
-  <a href="#load-the-extension"><img src="https://img.shields.io/badge/Load_Extension-ffffff?style=for-the-badge&labelColor=f3f4f6&color=ffffff" alt="Load Extension"></a>
-  <a href="#use-the-extension"><img src="https://img.shields.io/badge/Use_It-ffffff?style=for-the-badge&labelColor=f3f4f6&color=ffffff" alt="Use It"></a>
-  <a href="#check-it-works"><img src="https://img.shields.io/badge/Test_It-ffffff?style=for-the-badge&labelColor=f3f4f6&color=ffffff" alt="Test It"></a>
+  It separates observed OAuth requests from trusted permissions. A request can be <strong>NEW</strong>, <strong>KNOWN</strong>, or <strong>CHANGED</strong>, and only an explicit approval updates the trusted baseline.
 </p>
 
 ## What It Does
 
 - Detects OAuth-looking consent screens across normal websites
-- Extracts requested OAuth scopes
-- Saves permission history locally
-- Shows a before vs after permission diff
-- Flags unusual permission expansion
-- Shows recent history in the extension popup
+- Extracts and normalizes requested OAuth scopes
+- Stores OAuth observations locally
+- Maintains an explicit trusted permission baseline for each application
+- Shows requests as NEW, KNOWN, or CHANGED
+- Lets you Approve & Trust, Reject, or Ignore a request
+- Updates the trusted baseline only after an explicit approval
+- Shows semantic explanations of newly requested permissions
+- Groups permissions by risk
+- Keeps observed history separate from approved permissions
+
+## Trusted Baseline Flow
+
+```text
+OAuth request
+     ↓
+Identify application
+     ↓
+Find trusted baseline
+     ↓
+Compare permissions
+     ↓
+Risk + semantic analysis
+     ↓
+User decision
+     ↓
+Approve / Reject / Ignore
+     ↓
+Only Approve updates trusted baseline
+```
+
+### Baseline states
+
+```text
+NEW
+No trusted baseline exists for this application.
+
+KNOWN
+The request exactly matches the trusted baseline.
+
+CHANGED
+The request differs from the trusted baseline.
+```
+
+An observed request is never automatically promoted to a trusted baseline.
+
+## Semantic Permission Analysis
+
+Instead of only showing raw scopes such as:
+
+```text
+repo
+workflow
+```
+
+the extension explains the practical capability of newly requested permissions.
+
+For example:
+
+```text
+GitHub — Private repositories
+
+• Read private repositories
+• Modify repository contents
+• Access repository metadata
+
+Risk: HIGH
+```
+
+For Google Drive:
+
+```text
+Google Drive — Full Google Drive access
+
+• Read Drive files
+• Modify Drive files
+• Create Drive files
+• Delete Drive files
+
+Risk: CRITICAL
+```
 
 ## Load The Extension
 
@@ -50,9 +119,15 @@ OAuth Consent Diff
 
 1. Load the extension.
 2. Open an OAuth login or consent page.
-3. The extension shows an overlay on the consent screen.
-4. Review the risk level and permission changes.
-5. Open the extension popup to see saved history.
+3. Review the baseline state, risk level, and semantic permission explanation.
+4. Choose one:
+   - **Approve & Trust** to create the first baseline.
+   - **Approve & update baseline** when a changed request is intentionally accepted.
+   - **Reject** to record that you rejected the request.
+   - **Ignore** to dismiss the request without changing the trusted baseline.
+5. Open the extension popup to review saved history.
+
+> Reject records your decision inside OAuth Consent Diff. It does not automatically click the provider's Allow/Deny controls.
 
 ## Check It Works
 
@@ -63,12 +138,7 @@ npm test
 npm run build
 ```
 
-Expected result:
-
-```text
-5 tests passed
-Build check passed
-```
+The test suite covers trusted baseline states, permission drift, and semantic capability explanations.
 
 ## Manual Test Links
 
@@ -78,18 +148,39 @@ Open this GitHub baseline request first:
 https://github.com/login/oauth/authorize?client_id=oauth-consent-diff-test&scope=read:user
 ```
 
+The overlay should show:
+
+```text
+NEW
+```
+
+Choose **Approve & Trust**.
+
 Then open this expanded request:
 
 ```text
 https://github.com/login/oauth/authorize?client_id=oauth-consent-diff-test&scope=read:user%20repo%20workflow
 ```
 
-The second request should show a larger permission request because it adds more scopes.
+The overlay should now show:
+
+```text
+CHANGED
+```
+
+and explain the new GitHub repository and workflow capabilities.
+
+Choose **Ignore** or **Reject** and verify that the trusted baseline remains the original `read:user` permission.
+
+Choose **Approve & update baseline** and the new permissions become the trusted baseline for future requests.
 
 ## Expected Behavior
 
 - The overlay appears only on OAuth-looking consent pages.
 - Normal GitHub pages do not show the overlay.
-- The popup history updates after a detected request.
-- The Refresh button shows a circular loader while loading.
+- The first observed request is not automatically trusted.
+- Only an explicit approval creates or changes a trusted baseline.
+- Known requests are shown as KNOWN.
+- Permission drift is shown as CHANGED.
+- Semantic explanations are shown for newly added permissions.
 - Closing the overlay keeps it closed for the same request.

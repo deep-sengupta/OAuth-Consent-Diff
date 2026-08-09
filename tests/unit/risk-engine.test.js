@@ -5,24 +5,25 @@ require("../../extension/shared/constants.js");
 require("../../extension/scopes/scope-normalizer.js");
 const riskEngine = require("../../extension/risk/risk-engine.js");
 
-test("flags unusual expansion against history", () => {
+test("flags unusual expansion against a trusted baseline", () => {
   const analysis = riskEngine.analyze({
     providerId: "github",
-    previousScopes: ["read:user"],
+    trustedScopes: ["read:user"],
     currentScopes: ["read:user", "repo", "workflow"]
   });
   assert.equal(analysis.unusualExpansion, true);
+  assert.equal(analysis.baselineState, "changed");
   assert.equal(analysis.level, "critical");
   assert.deepEqual(analysis.added.map((scope) => scope.id).sort(), ["github.repo", "github.workflow"]);
 });
 
-test("first record becomes baseline", () => {
+test("first record has no trusted baseline", () => {
   const analysis = riskEngine.analyze({
     providerId: "google",
-    previousScopes: [],
     currentScopes: ["https://www.googleapis.com/auth/userinfo.email"]
   });
   assert.equal(analysis.hasHistory, false);
+  assert.equal(analysis.baselineState, "new");
   assert.equal(analysis.level, "low");
-  assert.equal(analysis.reasons[0], "First local record for this app");
+  assert.equal(analysis.reasons[0], "No trusted baseline exists for this app");
 });

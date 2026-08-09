@@ -6,13 +6,14 @@
   z-index: 2147483647;
   top: 18px;
   right: 18px;
-  width: min(390px, calc(100vw - 28px));
+  width: min(430px, calc(100vw - 28px));
   pointer-events: none;
 }
 
 .ocd-card,
 .ocd-card * {
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .ocd-card {
@@ -52,7 +53,6 @@
   font-size: 14px;
   line-height: 1.28;
   font-weight: 400;
-  letter-spacing: 0;
 }
 
 .ocd-subtitle {
@@ -82,22 +82,10 @@
   font-weight: 400;
   line-height: 1;
   cursor: pointer;
-  transition: background 150ms ease, transform 150ms ease;
-}
-
-.ocd-icon[data-action="minimize"] {
-  font-size: 23px;
-  padding-bottom: 2px;
-}
-
-.ocd-icon[data-action="close"] {
-  font-size: 22px;
-  padding-bottom: 1px;
 }
 
 .ocd-icon:hover {
   background: #e5e7eb;
-  transform: translateY(-1px);
 }
 
 .ocd-body {
@@ -122,7 +110,7 @@
   padding: 0 9px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: 0;
 }
 
@@ -144,6 +132,21 @@
 .ocd-risk-critical {
   background: #202124;
   color: #ffffff;
+}
+
+.ocd-state-new {
+  background: #eef2ff;
+  color: #4355a6;
+}
+
+.ocd-state-known {
+  background: #eaf8f1;
+  color: #0b7f59;
+}
+
+.ocd-state-changed {
+  background: #fff0ed;
+  color: #b3261e;
 }
 
 .ocd-chip {
@@ -175,20 +178,23 @@
 .ocd-section-title {
   color: #686b70;
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.ocd-scope {
+.ocd-scope,
+.ocd-semantic {
   display: grid;
-  grid-template-columns: auto 1fr;
   gap: 8px;
-  align-items: start;
   padding: 9px;
   border: 1px solid #e8eaed;
   border-radius: 12px;
   background: #ffffff;
+}
+
+.ocd-scope {
+  grid-template-columns: auto 1fr;
 }
 
 .ocd-dot {
@@ -199,28 +205,17 @@
   background: #9aa0a6;
 }
 
-.ocd-dot-low {
-  background: #10b981;
-}
-
-.ocd-dot-medium {
-  background: #f97316;
-}
-
-.ocd-dot-high {
-  background: #ef4444;
-}
-
-.ocd-dot-critical {
-  background: #202124;
-}
+.ocd-dot-low { background: #10b981; }
+.ocd-dot-medium { background: #f97316; }
+.ocd-dot-high { background: #ef4444; }
+.ocd-dot-critical { background: #202124; }
 
 .ocd-scope-title {
   display: block;
   color: #202124;
   font-size: 12px;
   line-height: 1.35;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .ocd-scope-copy {
@@ -231,63 +226,84 @@
   margin-top: 2px;
 }
 
+.ocd-semantic-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ocd-semantic-risk {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.ocd-capabilities {
+  display: grid;
+  gap: 5px;
+  margin: 4px 0 0;
+  padding-left: 16px;
+  color: #303134;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .ocd-footer {
   flex: 0 0 auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
   padding: 10px 14px;
   background: #fafafa;
   border-top: 1px solid #eef0f2;
 }
 
+.ocd-decision-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .ocd-button {
   min-height: 30px;
   border: 0;
   border-radius: 9px;
-  background: #ffab91;
+  background: #111827;
   color: #ffffff;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 11px;
+  font-weight: 500;
   padding: 0 10px;
   cursor: pointer;
-  transition: transform 150ms ease, opacity 150ms ease;
 }
 
-.ocd-button.secondary {
+.ocd-button.secondary,
+.ocd-button.ghost {
   background: transparent;
   color: #5f6368;
 }
 
-.ocd-button:hover {
-  transform: translateY(-1px);
+.ocd-button.danger {
+  background: #fce8e6;
+  color: #b3261e;
 }
 
-.ocd-details {
-  display: none;
-}
+.ocd-button:hover { opacity: 0.88; }
+.ocd-button:disabled { opacity: 0.5; cursor: default; }
 
-.ocd-details[data-open="true"] {
-  display: grid;
-  animation: ocd-soft 180ms ease both;
-}
+.ocd-details { display: none; }
+.ocd-details[data-open="true"] { display: grid; animation: ocd-soft 180ms ease both; }
 
 @keyframes ocd-enter {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes ocd-soft {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 520px) {
@@ -295,5 +311,12 @@
     top: 10px;
     right: 10px;
     width: calc(100vw - 20px);
+  }
+  .ocd-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ocd-decision-actions {
+    justify-content: flex-end;
   }
 }
