@@ -1,18 +1,8 @@
 (function (root) {
   const app = root.OAuthConsentDiff || {};
   const normalizer = app.scopeNormalizer;
-  const levelScore = {
-    low: 1,
-    medium: 2,
-    high: 3,
-    critical: 4
-  };
-  const expansionWeight = {
-    low: 1,
-    medium: 2,
-    high: 4,
-    critical: 7
-  };
+  const levelScore = { low: 1, medium: 2, high: 3, critical: 4 };
+  const expansionWeight = { low: 1, medium: 2, high: 4, critical: 7 };
 
   function byRisk(scopes) {
     const groups = { critical: [], high: [], medium: [], low: [] };
@@ -69,22 +59,12 @@
       else if (id === "gitlab.sudo") capabilities.push("Perform API actions as another user");
       else if (scope.description) capabilities.push(scope.description);
     }
-    return {
-      id: scope.id,
-      label: scope.label,
-      category: scope.category,
-      risk: scope.risk,
-      description: scope.description,
-      capabilities,
-      added: Boolean(added)
-    };
+    return { id: scope.id, label: scope.label, category: scope.category, risk: scope.risk, description: scope.description, capabilities, added: Boolean(added) };
   }
 
   function semanticAnalysis(currentScopes, addedScopes) {
     const addedIds = new Set(addedScopes.map((scope) => scope.id));
-    return currentScopes
-      .filter((scope) => addedIds.has(scope.id))
-      .map((scope) => semanticForScope(scope, true));
+    return currentScopes.filter((scope) => addedIds.has(scope.id)).map((scope) => semanticForScope(scope, true));
   }
 
   function analyze(input) {
@@ -147,14 +127,7 @@
     };
   }
 
-  app.riskEngine = {
-    analyze,
-    byRisk,
-    maxRisk,
-    levelScore,
-    semanticForScope,
-    semanticAnalysis
-  };
+  app.riskEngine = { analyze, byRisk, maxRisk, levelScore, semanticForScope, semanticAnalysis };
   root.OAuthConsentDiff = app;
   if (typeof module !== "undefined" && module.exports) module.exports = app.riskEngine;
-})(typeof globalThis !== "undefined' ? globalThis : window);
+})(typeof globalThis !== "undefined" ? globalThis : window);
