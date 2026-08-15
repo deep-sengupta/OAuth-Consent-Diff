@@ -18,6 +18,10 @@ async function handleMessage(message) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (!sender || sender.id !== chrome.runtime.id) {
+    sendResponse({ ok: false, error: "Unauthorized sender" });
+    return false;
+  }
   handleMessage(message || {})
     .then((result) => sendResponse({ ok: true, result }))
     .catch((error) => sendResponse({ ok: false, error: error && error.message ? error.message : String(error) }));
