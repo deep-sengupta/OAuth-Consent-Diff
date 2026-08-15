@@ -36,12 +36,10 @@
       request.onerror = () => reject(request.error);
     });
   }
-
   async function getStoreValue(storeName, key) {
     const db = await openDB();
     return requestToPromise(db.transaction(storeName, "readonly").objectStore(storeName).get(key));
   }
-
   async function putStoreValue(storeName, value) {
     const db = await openDB();
     return new Promise((resolve, reject) => {
@@ -52,24 +50,33 @@
       tx.onabort = () => reject(tx.error);
     });
   }
-
   async function getAll(storeName) {
     const db = await openDB();
     return requestToPromise(db.transaction(storeName, "readonly").objectStore(storeName).getAll());
   }
 
+  function authorizationContext(input) {
+    const value = input || {};
+    try {
+      const url = new URL(value.url || "");
+      return url.origin + url.pathname;
+    } catch (error) {
+      return value.host || "unknown-endpoint";
+    }
+  }
+
   function appKey(input) {
     const value = input || {};
     const providerId = value.providerId || value.provider || "generic";
-    const identity = value.clientId || value.appId || value.appName || value.host || "unknown";
+    const clientId = value.clientId || value.appId || "unknown-client";
+    const endpoint = authorizationContext(value);
+    const identity = clientId + "@" + endpoint;
     return providerId + ":" + (utils.compactKey ? utils.compactKey(identity) : String(identity).toLowerCase());
   }
 
   function uniqueScopeRecords(records) {
     const map = new Map();
-    for (const scope of records || []) {
-      if (scope && scope.id && !map.has(scope.id)) map.set(scope.id, scope);
-    }
+    for (const scope of records || []) if (scope && scope.id && !map.has(scope.id)) map.set(scope.id, scope);
     return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
   }
 
@@ -82,6 +89,7 @@
       appName: source.appName || "Unknown app",
       clientId: source.clientId || "",
       host: source.host || "",
+      authorizationEndpoint: authorizationContext(source),
       firstSeen: null,
       lastSeen: null,
       observations: 0,
@@ -123,6 +131,7 @@
       appName: context.appName || existing.appName || "Unknown app",
       clientId: context.clientId || existing.clientId || "",
       host: context.host || existing.host || "",
+      authorizationEndpoint: authorizationContext(context),
       firstSeen: existing.firstSeen || now,
       lastSeen: now,
       observations: (existing.observations || 0) + 1,
@@ -137,6 +146,7 @@
       appName: profile.appName,
       clientId: profile.clientId,
       host: profile.host,
+      authorizationEndpoint: profile.authorizationEndpoint,
       url: context.url || "",
       observedAt: now,
       decision: input.decision || "observed",
@@ -174,11 +184,7 @@
     const observationId = input.observationId || "";
     const counts = Object.assign({ approved: 0, rejected: 0, ignored: 0 }, existing.decisionCounts || {});
     counts[decision] += 1;
-    const profile = Object.assign({}, existing, {
-      lastDecision: decision,
-      lastDecisionAt: now,
-      decisionCounts: counts
-    });
+    const profile = Object.assign({}, existing, { lastDecision: decision, lastDecisionAt: now, decisionCounts: counts });
     if (decision === "approved") {
       profile.trustedScopes = currentScopes;
       profile.lastApprovedScopes = currentScopes;
@@ -193,7 +199,7 @@
         const request = store.get(observationId);
         request.onsuccess = () => {
           const observation = request.result;
-          if (observation) {
+          if (observation && observation.profileKey === key) {
             observation.decision = decision;
             observation.decidedAt = now;
             store.put(observation);
@@ -212,22 +218,13 @@
     const sorted = rows.sort((a, b) => String(b.observedAt).localeCompare(String(a.observedAt)));
     return typeof limit === "number" ? sorted.slice(0, limit) : sorted;
   }
-
   async function getStats() {
     const profiles = await getAll(PROFILES);
     const observations = await getAll(OBSERVATIONS);
     const unusual = observations.filter((row) => row.analysis && row.analysis.unusualExpansion).length;
     const critical = observations.filter((row) => row.analysis && row.analysis.level === "critical").length;
-    return {
-      apps: profiles.length,
-      observations: observations.length,
-      unusual,
-      critical,
-      trusted: profiles.filter((profile) => (profile.trustedScopes || []).length > 0).length,
-      lastSeen: observations.sort((a, b) => String(b.observedAt).localeCompare(String(a.observedAt)))[0] || null
-    };
+    return { apps: profiles.length, observations: observations.length, unusual, critical, trusted: profiles.filter((profile) => (profile.trustedScopes || []).length > 0).length, lastSeen: observations.sort((a, b) => String(b.observedAt).localeCompare(String(a.observedAt)))[0] || null };
   }
-
   async function clearAll() {
     const db = await openDB();
     await new Promise((resolve, reject) => {
@@ -241,31 +238,16 @@
     });
     return true;
   }
-
   async function getSettings() {
     const stored = await getStoreValue(SETTINGS, "main");
     return stored || { key: "main", overlayEnabled: true, compactMode: false };
   }
-
   async function saveSettings(settings) {
     const current = await getSettings();
     return putStoreValue(SETTINGS, Object.assign({}, current, settings || {}, { key: "main" }));
   }
 
-  app.historyDB = {
-    openDB,
-    appKey,
-    getProfile,
-    saveObservation,
-    recordDecision,
-    listRecent,
-    getStats,
-    clearAll,
-    getSettings,
-    saveSettings
-  };
+  app.historyDB = { openDB, appKey, getProfile, saveObservation, recordDecision, listRecent, getStats, clearAll, getSettings, saveSettings };
   root.OAuthConsentDiff = app;
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = app.historyDB;
-  }
+  if (typeof module !== "undefined" && module.exports) module.exports = app.historyDB;
 })(typeof globalThis !== "undefined" ? globalThis : self);
