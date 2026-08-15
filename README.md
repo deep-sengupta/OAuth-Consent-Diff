@@ -14,13 +14,15 @@
 
 ## Bug Fixes #1
 
-- Fixed OAuth scope detection relying on arbitrary visible page text as if it were an authoritative permission request.
-- Fixed unrelated page content containing permission-related phrases from being interpreted as newly requested OAuth scopes.
-- Fixed risk analysis being influenced by inferred permissions that were not actually present in the OAuth request.
-- Fixed trusted-baseline comparisons being polluted by false-positive scope extraction.
-- Improved separation between authoritative OAuth scope parameters and supplemental consent-screen text.
-- Reduced false `NEW` and `CHANGED` states caused by unrelated permission descriptions or page content.
-- Reduced incorrect risk classifications caused by text-based scope inference.
+- Removed arbitrary visible-page-text scope inference from the authoritative OAuth permission extraction path.
+- OAuth scopes are now taken from the OAuth request parameters instead of unrelated consent-screen descriptions.
+- Removed provider page-text parsing that could manufacture Google, GitHub, or GitLab permissions that were not requested.
+- Hardened generic OAuth detection so an OAuth-related URL keyword alone is not sufficient without a `client_id` and an OAuth scope or authorization endpoint.
+- Changed unknown OAuth scopes to use an explicit medium-risk fallback instead of guessing risk from words such as `admin`, `delete`, `read`, or `write`.
+- Bound trusted baselines to the provider, client identity, and authorization endpoint instead of only the `client_id`.
+- Bound Approve, Reject, and Ignore decisions to the currently displayed consent fingerprint to prevent stale consent state from being recorded.
+- Added regression tests for URL-only scope extraction, unknown-scope handling, authorization-endpoint baseline identity, and page-text inference removal.
+- Added sender validation to the background message handler before privileged storage operations are executed.
 
 ## Findings
 
@@ -30,8 +32,12 @@
 | 2 | Unrelated permission descriptions could create false-positive scope changes | Medium | Fixed |
 | 3 | False-positive scopes could affect OAuth risk analysis | Medium | Fixed |
 | 4 | False-positive scopes could affect trusted-baseline comparisons | Medium | Fixed |
-| 5 | Generic OAuth detection could inspect pages based on OAuth-related URL keywords | Low | Reviewed |
+| 5 | Generic OAuth detection could inspect pages based on OAuth-related URL keywords | Low | Fixed |
+| 6 | Trusted baselines could be reused across authorization endpoints sharing a client ID | Medium | Fixed |
+| 7 | Dynamic OAuth page changes could leave approval decisions bound to stale consent state | Medium | Fixed |
+| 8 | Unknown scope names could receive misleading risk classifications from keyword matching | Medium | Fixed |
+| 9 | Background message handling lacked an explicit sender identity check | Medium | Fixed |
 
 ## Bug Fix Summary
 
-The primary fix ensures that OAuth Consent Diff does not treat arbitrary rendered page text as authoritative evidence that an OAuth scope was requested. Permission comparisons and risk analysis should be based on the actual OAuth request wherever possible, preventing unrelated page content from changing the security result.
+OAuth Consent Diff now treats the OAuth request as the authoritative source for requested permissions. Page text is no longer converted into scopes, unknown scopes are presented conservatively, trusted baselines are bound to the authorization endpoint, and user decisions are tied to the consent state that is actually displayed. The background service worker also validates message senders before performing privileged storage operations.
