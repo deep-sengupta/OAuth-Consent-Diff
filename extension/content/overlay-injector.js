@@ -4,18 +4,11 @@
   let lastFingerprint = "";
   let renderedFingerprint = "";
   let scanTimer = 0;
-  let currentObservationId = "";
-  let currentConsent = null;
-  let currentScopes = [];
+  let currentState = null;
   const dismissedFingerprints = new Set();
 
-  function isDismissed(fingerprint) {
-    return dismissedFingerprints.has(fingerprint);
-  }
-
-  function markDismissed(fingerprint) {
-    dismissedFingerprints.add(fingerprint);
-  }
+  function isDismissed(fingerprint) { return dismissedFingerprints.has(fingerprint); }
+  function markDismissed(fingerprint) { dismissedFingerprints.add(fingerprint); }
 
   function removeHost() {
     const host = root.document.getElementById("oauth-consent-diff-root");
@@ -25,15 +18,9 @@
 
   function send(type, payload) {
     return new Promise((resolve) => {
-      if (!root.chrome || !chrome.runtime || !chrome.runtime.sendMessage) {
-        resolve(null);
-        return;
-      }
+      if (!root.chrome || !chrome.runtime || !chrome.runtime.sendMessage) return resolve(null);
       chrome.runtime.sendMessage({ type, payload }, (response) => {
-        if (chrome.runtime.lastError || !response || !response.ok) {
-          resolve(null);
-          return;
-        }
+        if (chrome.runtime.lastError || !response || !response.ok) return resolve(null);
         resolve(response.result);
       });
     });
@@ -56,14 +43,18 @@
   }
 
   async function decide(decision, fingerprint) {
+    const state = currentState;
+    if (!state || state.fingerprint !== fingerprint) return;
     const result = await send(messages.recordDecision, {
-      context: currentConsent,
-      currentScopes,
-      observationId: currentObservationId,
-      decision
+      context: state.consent,
+      currentScopes: state.scopes,
+      observationId: state.observationId,
+      decision,
+      fingerprint
     });
-    if (result) {
+    if (result && currentState && currentState.fingerprint === fingerprint) {
       markDismissed(fingerprint);
+      currentState = null;
       removeHost();
     }
   }
@@ -71,39 +62,46 @@
   async function scan() {
     const consent = app.consentDetector.detect(root.document, root.location);
     if (!consent) {
+      currentState = null;
       removeHost();
       return;
     }
     const scopes = app.scopeExtractor.extract(consent);
     if (!scopes.length) {
+      currentState = null;
       removeHost();
       return;
     }
     const fingerprint = app.scopeExtractor.fingerprint(consent, scopes);
     if (isDismissed(fingerprint)) {
+      currentState = null;
       removeHost();
       return;
     }
     const profile = await send(messages.getProfile, consent);
+    const currentConsent = app.consentDetector.detect(root.document, root.location);
+    const currentScopes = currentConsent ? app.scopeExtractor.extract(currentConsent) : [];
+    const currentFingerprint = currentConsent && currentScopes.length ? app.scopeExtractor.fingerprint(currentConsent, currentScopes) : "";
+    if (currentFingerprint !== fingerprint) {
+      schedule();
+      return;
+    }
     const trustedScopes = profile && profile.trustedScopes ? profile.trustedScopes : [];
-    const analysis = app.riskEngine.analyze({
-      providerId: consent.providerId,
-      currentScopes: scopes,
-      trustedScopes,
-      appName: consent.appName
-    });
+    const analysis = app.riskEngine.analyze({ providerId: consent.providerId, currentScopes: scopes, trustedScopes, appName: consent.appName });
 
     if (fingerprint !== lastFingerprint) {
       lastFingerprint = fingerprint;
-      currentConsent = consent;
-      currentScopes = scopes;
-      const saved = await send(messages.saveObservation, {
-        context: consent,
-        currentScopes: scopes,
-        analysis,
-        observedAt: consent.detectedAt
-      });
-      currentObservationId = saved && saved.observation ? saved.observation.id : "";
+      const saved = await send(messages.saveObservation, { context: consent, currentScopes: scopes, analysis, observedAt: consent.detectedAt });
+      const latestConsent = app.consentDetector.detect(root.document, root.location);
+      const latestScopes = latestConsent ? app.scopeExtractor.extract(latestConsent) : [];
+      const latestFingerprint = latestConsent && latestScopes.length ? app.scopeExtractor.fingerprint(latestConsent, latestScopes) : "";
+      if (latestFingerprint !== fingerprint) {
+        schedule();
+        return;
+      }
+      currentState = { fingerprint, consent, scopes, observationId: saved && saved.observation ? saved.observation.id : "" };
+    } else if (!currentState || currentState.fingerprint !== fingerprint) {
+      currentState = { fingerprint, consent, scopes, observationId: "" };
     }
 
     if (renderedFingerprint !== fingerprint || !root.document.getElementById("oauth-consent-diff-root")) {
@@ -124,11 +122,8 @@
     scanTimer = setTimeout(scan, 350);
   }
 
-  if (root.document.readyState === "loading") {
-    root.document.addEventListener("DOMContentLoaded", schedule, { once: true });
-  } else {
-    schedule();
-  }
+  if (root.document.readyState === "loading") root.document.addEventListener("DOMContentLoaded", schedule, { once: true });
+  else schedule();
 
   const observer = new MutationObserver(schedule);
   observer.observe(root.document.documentElement, { childList: true, subtree: true });

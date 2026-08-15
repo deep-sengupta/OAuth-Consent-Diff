@@ -19,7 +19,13 @@ test("extracts scopes from oauth URL", () => {
   assert.deepEqual(scopes, ["read:user", "repo"]);
 });
 
-test("infers human consent text", () => {
-  const scopes = normalizer.inferScopesFromText("See, edit, create, and delete all of your Google Drive files", "google");
-  assert.ok(scopes.includes("google.drive"));
+test("does not expose page-text scope inference as an extraction API", () => {
+  assert.equal(normalizer.inferScopesFromText, undefined);
+});
+
+test("unknown scopes are not classified by misleading keyword names", () => {
+  const scopes = normalizer.normalizeScopes(["admin_like_but_unknown_scope", "read_like_but_unknown_scope"], "generic");
+  assert.equal(scopes.length, 2);
+  assert.ok(scopes.every((scope) => scope.known === false));
+  assert.ok(scopes.every((scope) => scope.risk === "medium"));
 });

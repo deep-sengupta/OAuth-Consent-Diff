@@ -3,17 +3,15 @@
   const normalizer = app.scopeNormalizer;
   const utils = app.utils || {};
   function detect(context) {
-    const page = (context.text || "").toLowerCase();
     try {
       const url = new URL(context.url || "");
-      const oauthPath = /authorize|consent|oauth/.test(url.pathname);
+      const oauthPath = /(?:^|\/)authorize(?:\/|$)|(?:^|\/)oauth(?:\/|$)|(?:^|\/)consent(?:\/|$)/.test(url.pathname);
       const hasClientId = url.searchParams.has("client_id");
-      const hasScope = url.searchParams.has("scope") || url.searchParams.has("scopes");
+      const hasScope = url.searchParams.has("scope") || url.searchParams.has("scopes") || url.searchParams.has("requested_scope");
       if (!hasClientId || (!hasScope && !oauthPath)) return 0;
       let score = 2;
       if (hasScope) score += 2;
-      if (oauthPath) score += 1;
-      if (page.includes("authorize") && page.includes("access")) score += 1;
+      if (oauthPath) score += 2;
       return score;
     } catch (error) {
       return 0;
@@ -39,17 +37,7 @@
     }
   }
   function scopes(documentRef, context) {
-    return [
-      ...normalizer.extractScopesFromUrl(context.url),
-      ...normalizer.inferScopesFromText(context.text || "", "generic")
-    ];
+    return normalizer.extractScopesFromUrl(context.url);
   }
-  app.providers.register({
-    id: "generic",
-    label: "OAuth",
-    detect,
-    extractAppName: appName,
-    extractClientId: clientId,
-    extractScopes: scopes
-  });
+  app.providers.register({ id: "generic", label: "OAuth", detect, extractAppName: appName, extractClientId: clientId, extractScopes: scopes });
 })(typeof globalThis !== "undefined" ? globalThis : window);
