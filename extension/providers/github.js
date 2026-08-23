@@ -4,7 +4,7 @@
   const utils = app.utils || {};
   function detect(context) {
     const host = context.host || "";
-    if (!host.endsWith("github.com")) return 0;
+    if (host !== "github.com" && !host.endsWith(".github.com")) return 0;
     try {
       const url = new URL(context.url || "");
       const oauthPath = /\/login\/oauth\/authorize|\/oauth\/authorize/.test(url.pathname);
