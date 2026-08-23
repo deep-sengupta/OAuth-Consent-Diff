@@ -251,4 +251,4 @@
   app.historyDB = { openDB, appKey, getProfile, saveObservation, recordDecision, listRecent, getStats, clearAll, getSettings, saveSettings };
   root.OAuthConsentDiff = app;
   if (typeof module !== "undefined" && module.exports) module.exports = app.historyDB;
-})(typeof globalThis !== "undefined" ? globalThis : self);
+})(typeof globalThis !== "undefined' ? globalThis : self);
