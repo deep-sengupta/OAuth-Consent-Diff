@@ -39,7 +39,7 @@
     const semantic = analysis.semantic || [];
     const riskClass = "ocd-risk-" + analysis.level;
     const stateClass = "ocd-state-" + analysis.baselineState;
-    const actionText = analysis.baselineState === "changed" ? "Approve & update baseline" : "Approve & trust";
+    const actionText = analysis.baselineState === "changed" ? "Approve" : "Approve & trust";
     rootNode.innerHTML = [
       '<article class="ocd-card" data-minimized="false">',
       '<header class="ocd-top">',
@@ -77,6 +77,7 @@
       '<button class="ocd-button ghost" type="button" data-action="ignore">Ignore</button>',
       '<button class="ocd-button danger" type="button" data-action="reject">Reject</button>',
       '<button class="ocd-button" type="button" data-action="approve">' + escapeHtml(actionText) + '</button>',
+      (analysis.baselineState === "changed" ? '<button class="ocd-button secondary" type="button" data-action="trust">Approve & trust</button>' : ''),
       '</div>',
       '</footer>',
       '</article>'
@@ -98,11 +99,14 @@
       details.setAttribute("data-open", String(next));
       detailsButton.textContent = next ? "Hide" : "Details";
     });
-    for (const action of ["approve", "reject", "ignore"]) {
+    for (const action of ["approve", "trust", "reject", "ignore"]) {
       const button = rootNode.querySelector('[data-action="' + action + '"]');
       if (button) button.addEventListener("click", () => {
         button.disabled = true;
-        if (typeof model.onDecision === "function") model.onDecision(action === "approve" ? "approved" : action === "reject" ? "rejected" : "ignored");
+        if (typeof model.onDecision === "function") {
+          const decision = action === "reject" ? "rejected" : action === "ignore" ? "ignored" : "approved";
+          model.onDecision({ decision, updateBaseline: action === "trust" || analysis.baselineState === "new" });
+        }
       });
     }
   }

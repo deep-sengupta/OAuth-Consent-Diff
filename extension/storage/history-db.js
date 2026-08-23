@@ -185,7 +185,7 @@
     const counts = Object.assign({ approved: 0, rejected: 0, ignored: 0 }, existing.decisionCounts || {});
     counts[decision] += 1;
     const profile = Object.assign({}, existing, { lastDecision: decision, lastDecisionAt: now, decisionCounts: counts });
-    if (decision === "approved") {
+    if (decision === "approved" && (!(existing.trustedScopes || []).length || input.updateBaseline === true)) {
       const trustedScopes = uniqueScopeRecords([...(existing.trustedScopes || []), ...currentScopes]);
       profile.trustedScopes = trustedScopes;
       profile.lastApprovedScopes = currentScopes;
