@@ -6,10 +6,12 @@
     return normalizer.normalizeScopes(consent.rawScopes || [], consent.providerId);
   }
   function fingerprint(consent, scopes) {
-    const utils = app.utils || {};
-    const scopeKey = (scopes || []).map((scope) => scope.id).sort().join("|");
-    const base = [consent.providerId, consent.clientId || consent.appName, scopeKey].join("::");
-    return utils.hashString ? utils.hashString(base) : base;
+    const scopeKey = (scopes || []).map((scope) => scope.id).sort();
+    return JSON.stringify([
+      consent.providerId,
+      consent.clientId || consent.appName,
+      scopeKey
+    ]);
   }
   app.scopeExtractor = {
     extract,

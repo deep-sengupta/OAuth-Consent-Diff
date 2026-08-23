@@ -42,14 +42,17 @@
     return shadow;
   }
 
-  async function decide(decision, fingerprint) {
+  async function decide(decisionInput, fingerprint) {
     const state = currentState;
     if (!state || state.fingerprint !== fingerprint) return;
+    const decision = typeof decisionInput === "string" ? decisionInput : decisionInput && decisionInput.decision;
+    const updateBaseline = typeof decisionInput === "object" && Boolean(decisionInput.updateBaseline);
     const result = await send(messages.recordDecision, {
       context: state.consent,
       currentScopes: state.scopes,
       observationId: state.observationId,
       decision,
+      updateBaseline,
       fingerprint
     });
     if (result && currentState && currentState.fingerprint === fingerprint) {

@@ -22,13 +22,17 @@
   "background": {
     "service_worker": "extension/background/service-worker.js"
   },
-  "host_permissions": [
-    "<all_urls>"
-  ],
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "https://accounts.google.com/o/oauth2/*",
+        "https://accounts.google.com/signin/oauth*",
+        "https://accounts.google.com/oauthchooseaccount*",
+        "https://github.com/login/oauth/authorize*",
+        "https://github.com/oauth/authorize*",
+        "https://*.github.com/login/oauth/authorize*",
+        "https://*.github.com/oauth/authorize*",
+        "https://gitlab.com/oauth/authorize*"
       ],
       "run_at": "document_idle",
       "js": [
@@ -54,7 +58,14 @@
         "extension/ui/overlay/overlay.css"
       ],
       "matches": [
-        "<all_urls>"
+        "https://accounts.google.com/o/oauth2/*",
+        "https://accounts.google.com/signin/oauth*",
+        "https://accounts.google.com/oauthchooseaccount*",
+        "https://github.com/login/oauth/authorize*",
+        "https://github.com/oauth/authorize*",
+        "https://*.github.com/login/oauth/authorize*",
+        "https://*.github.com/oauth/authorize*",
+        "https://gitlab.com/oauth/authorize*"
       ]
     }
   ]
