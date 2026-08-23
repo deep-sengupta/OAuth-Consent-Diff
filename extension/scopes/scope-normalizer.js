@@ -97,7 +97,7 @@
     return value;
   }
   function riskFromUnknown() {
-    return "medium";
+    return "high";
   }
   function categoryFromUnknown(id) {
     const text = id.toLowerCase();
@@ -138,7 +138,7 @@
       label: source.label || humanize(fallbackId),
       category: source.category || categoryFromUnknown(fallbackId),
       risk: source.risk || riskFromUnknown(fallbackId),
-      description: source.description || "This scope is not in the local provider catalog. Review the provider documentation before approving it.",
+      description: source.description || "This scope is not in the local provider catalog. Its capability is unverified; review the provider documentation before approving it.",
       known: false
     };
   }

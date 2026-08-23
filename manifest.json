@@ -22,13 +22,20 @@
   "background": {
     "service_worker": "extension/background/service-worker.js"
   },
-  "host_permissions": [
-    "<all_urls>"
-  ],
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "*://*/oauth/authorize*",
+        "*://*/oauth2/authorize*",
+        "*://*/authorize*",
+        "*://*/consent*",
+        "*://*/approval*",
+        "*://*/o/oauth2/*",
+        "*://*/signin/oauth*",
+        "*://*/oauthchooseaccount*",
+        "https://github.com/login/oauth/authorize*",
+        "https://github.com/oauth/authorize*",
+        "https://gitlab.com/oauth/authorize*"
       ],
       "run_at": "document_idle",
       "js": [
@@ -54,7 +61,17 @@
         "extension/ui/overlay/overlay.css"
       ],
       "matches": [
-        "<all_urls>"
+        "*://*/oauth/authorize*",
+        "*://*/oauth2/authorize*",
+        "*://*/authorize*",
+        "*://*/consent*",
+        "*://*/approval*",
+        "*://*/o/oauth2/*",
+        "*://*/signin/oauth*",
+        "*://*/oauthchooseaccount*",
+        "https://github.com/login/oauth/authorize*",
+        "https://github.com/oauth/authorize*",
+        "https://gitlab.com/oauth/authorize*"
       ]
     }
   ]
