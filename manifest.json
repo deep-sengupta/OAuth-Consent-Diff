@@ -25,16 +25,13 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*/oauth/authorize*",
-        "*://*/oauth2/authorize*",
-        "*://*/authorize*",
-        "*://*/consent*",
-        "*://*/approval*",
-        "*://*/o/oauth2/*",
-        "*://*/signin/oauth*",
-        "*://*/oauthchooseaccount*",
+        "https://accounts.google.com/o/oauth2/*",
+        "https://accounts.google.com/signin/oauth*",
+        "https://accounts.google.com/oauthchooseaccount*",
         "https://github.com/login/oauth/authorize*",
         "https://github.com/oauth/authorize*",
+        "https://*.github.com/login/oauth/authorize*",
+        "https://*.github.com/oauth/authorize*",
         "https://gitlab.com/oauth/authorize*"
       ],
       "run_at": "document_idle",
@@ -61,16 +58,13 @@
         "extension/ui/overlay/overlay.css"
       ],
       "matches": [
-        "*://*/oauth/authorize*",
-        "*://*/oauth2/authorize*",
-        "*://*/authorize*",
-        "*://*/consent*",
-        "*://*/approval*",
-        "*://*/o/oauth2/*",
-        "*://*/signin/oauth*",
-        "*://*/oauthchooseaccount*",
+        "https://accounts.google.com/o/oauth2/*",
+        "https://accounts.google.com/signin/oauth*",
+        "https://accounts.google.com/oauthchooseaccount*",
         "https://github.com/login/oauth/authorize*",
         "https://github.com/oauth/authorize*",
+        "https://*.github.com/login/oauth/authorize*",
+        "https://*.github.com/oauth/authorize*",
         "https://gitlab.com/oauth/authorize*"
       ]
     }
