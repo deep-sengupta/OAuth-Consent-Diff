@@ -58,14 +58,10 @@
         "extension/ui/overlay/overlay.css"
       ],
       "matches": [
-        "https://accounts.google.com/o/oauth2/*",
-        "https://accounts.google.com/signin/oauth*",
-        "https://accounts.google.com/oauthchooseaccount*",
-        "https://github.com/login/oauth/authorize*",
-        "https://github.com/oauth/authorize*",
-        "https://*.github.com/login/oauth/authorize*",
-        "https://*.github.com/oauth/authorize*",
-        "https://gitlab.com/oauth/authorize*"
+        "https://accounts.google.com/*",
+        "https://github.com/*",
+        "https://*.github.com/*",
+        "https://gitlab.com/*"
       ]
     }
   ]
