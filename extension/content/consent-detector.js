@@ -14,7 +14,7 @@
     const url = String(context.url || "").toLowerCase();
     if (host === "accounts.google.com") return true;
     if (host === "gitlab.com") return true;
-    if (host.endsWith("github.com")) return true;
+    if (host === "github.com" || host.endsWith(".github.com")) return true;
     return /oauth|authorize|authorization|consent|approval|client_id=|scope=|scopes=|response_type=/.test(url);
   }
   function detect(documentRef, locationRef) {
