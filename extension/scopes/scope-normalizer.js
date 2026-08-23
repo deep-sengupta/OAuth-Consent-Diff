@@ -99,16 +99,6 @@
   function riskFromUnknown() {
     return "high";
   }
-  function categoryFromUnknown(id) {
-    const text = id.toLowerCase();
-    if (/(email|gmail|mail)/.test(text)) return "Email";
-    if (/(repo|repository|gist|code)/.test(text)) return "Code";
-    if (/(drive|file|photo|storage)/.test(text)) return "Files";
-    if (/(calendar|event)/.test(text)) return "Calendar";
-    if (/(admin|org|organization|team)/.test(text)) return "Administration";
-    if (/(profile|user|identity|openid|email)/.test(text)) return "Identity";
-    return "Unknown OAuth scope";
-  }
   function humanize(id) {
     return String(id || "")
       .replace(/^github\./, "")
@@ -135,10 +125,10 @@
       raw: source.raw || decoded || fallbackId,
       seenAs: source.seenAs || source.raw || decoded || fallbackId,
       provider: providerId || "generic",
-      label: source.label || humanize(fallbackId),
-      category: source.category || categoryFromUnknown(fallbackId),
-      risk: source.risk || riskFromUnknown(fallbackId),
-      description: source.description || "This scope is not in the local provider catalog. Its capability is unverified; review the provider documentation before approving it.",
+      label: "Unverified OAuth scope",
+      category: "Unverified OAuth scope",
+      risk: source.risk || riskFromUnknown(),
+      description: "This scope is not in the local provider catalog. Its capability and category are unverified; review the provider documentation before approving it.",
       known: false
     };
   }
