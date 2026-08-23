@@ -23,10 +23,12 @@ test("does not expose page-text scope inference as an extraction API", () => {
   assert.equal(normalizer.inferScopesFromText, undefined);
 });
 
-test("unknown scopes are treated as high-risk and unverified", () => {
+test("unknown scopes are high risk and never semantically categorized by their names", () => {
   const scopes = normalizer.normalizeScopes(["admin_like_but_unknown_scope", "read_like_but_unknown_scope"], "generic");
   assert.equal(scopes.length, 2);
   assert.ok(scopes.every((scope) => scope.known === false));
   assert.ok(scopes.every((scope) => scope.risk === "high"));
-  assert.ok(scopes.every((scope) => scope.description.includes("unverified")));
+  assert.ok(scopes.every((scope) => scope.label === "Unverified OAuth scope"));
+  assert.ok(scopes.every((scope) => scope.category === "Unverified OAuth scope"));
+  assert.ok(scopes.every((scope) => /unverified/i.test(scope.description)));
 });
