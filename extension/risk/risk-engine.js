@@ -101,7 +101,7 @@
     if (!hasBaseline) recommendations.push("Review the permissions and approve only if you trust this application.");
     if (level === "critical") recommendations.push("Approve only if you expected broad account control.");
     if (level === "high") recommendations.push("Check whether this app truly needs this data now.");
-    if (unusualExpansion) recommendations.push("This request is larger than the trusted baseline. Approving it will add these scopes to the trusted baseline.");
+    if (unusualExpansion) recommendations.push("This request is larger than the trusted baseline. Use Approve & trust only if you want these new scopes added to the trusted baseline.");
     if (baselineState === "known") recommendations.push("The request matches the permissions you previously approved.");
 
     return {
