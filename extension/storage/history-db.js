@@ -7,7 +7,6 @@
   const OBSERVATIONS = "observations";
   const SETTINGS = "settings";
   let openPromise;
-
   function openDB() {
     if (!root.indexedDB) return Promise.reject(new Error("IndexedDB is not available"));
     if (openPromise) return openPromise;
@@ -29,7 +28,6 @@
     });
     return openPromise;
   }
-
   function requestToPromise(request) {
     return new Promise((resolve, reject) => {
       request.onsuccess = () => resolve(request.result);
@@ -54,7 +52,6 @@
     const db = await openDB();
     return requestToPromise(db.transaction(storeName, "readonly").objectStore(storeName).getAll());
   }
-
   function authorizationContext(input) {
     const value = input || {};
     try {
@@ -64,7 +61,6 @@
       return value.host || "unknown-endpoint";
     }
   }
-
   function appKey(input) {
     const value = input || {};
     const providerId = value.providerId || value.provider || "generic";
@@ -73,13 +69,11 @@
     const identity = providerId + "\u0000" + clientId + "\u0000" + endpoint;
     return "oauth-profile:" + encodeURIComponent(identity);
   }
-
   function uniqueScopeRecords(records) {
     const map = new Map();
     for (const scope of records || []) if (scope && scope.id && !map.has(scope.id)) map.set(scope.id, scope);
     return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
   }
-
   function emptyProfile(input) {
     const key = typeof input === "string" ? input : appKey(input);
     const source = typeof input === "string" ? {} : input || {};
@@ -104,7 +98,6 @@
       maxRisk: "low"
     };
   }
-
   async function getProfile(input) {
     const key = typeof input === "string" ? input : appKey(input);
     const stored = await getStoreValue(PROFILES, key);
@@ -115,7 +108,6 @@
       decisionCounts: Object.assign({ approved: 0, rejected: 0, ignored: 0 }, stored.decisionCounts || {})
     });
   }
-
   async function saveObservation(input) {
     const context = input.context || input;
     const key = appKey(context);
@@ -172,7 +164,6 @@
     });
     return { profile, observation };
   }
-
   async function recordDecision(input) {
     const context = input.context || input;
     const decision = String(input.decision || "").toLowerCase();
@@ -213,7 +204,6 @@
     });
     return profile;
   }
-
   async function listRecent(limit) {
     const rows = await getAll(OBSERVATIONS);
     const sorted = rows.sort((a, b) => String(b.observedAt).localeCompare(String(a.observedAt)));
@@ -247,8 +237,7 @@
     const current = await getSettings();
     return putStoreValue(SETTINGS, Object.assign({}, current, settings || {}, { key: "main" }));
   }
-
   app.historyDB = { openDB, appKey, getProfile, saveObservation, recordDecision, listRecent, getStats, clearAll, getSettings, saveSettings };
   root.OAuthConsentDiff = app;
   if (typeof module !== "undefined" && module.exports) module.exports = app.historyDB;
-})(typeof globalThis !== "undefined' ? globalThis : self);
+})(typeof globalThis !== "undefined" ? globalThis : self);
