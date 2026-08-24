@@ -70,8 +70,8 @@
     const providerId = value.providerId || value.provider || "generic";
     const clientId = value.clientId || value.appId || "unknown-client";
     const endpoint = authorizationContext(value);
-    const identity = clientId + "@" + endpoint;
-    return providerId + ":" + (utils.compactKey ? utils.compactKey(identity) : String(identity).toLowerCase());
+    const identity = providerId + "\u0000" + clientId + "\u0000" + endpoint;
+    return "oauth-profile:" + encodeURIComponent(identity);
   }
 
   function uniqueScopeRecords(records) {
@@ -251,4 +251,4 @@
   app.historyDB = { openDB, appKey, getProfile, saveObservation, recordDecision, listRecent, getStats, clearAll, getSettings, saveSettings };
   root.OAuthConsentDiff = app;
   if (typeof module !== "undefined" && module.exports) module.exports = app.historyDB;
-})(typeof globalThis !== "undefined" ? globalThis : self);
+})(typeof globalThis !== "undefined' ? globalThis : self);
