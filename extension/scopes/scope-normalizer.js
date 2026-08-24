@@ -82,7 +82,7 @@
     sudo: "gitlab.sudo"
   };
   function splitScopeText(value) {
-    return String(value || "").split(/[\s,+]+/).map((part) => part.trim()).filter(Boolean);
+    return String(value || "").split(/\s+/).map((part) => part.trim()).filter(Boolean);
   }
   function decodeScope(value) {
     const raw = String(value || "").trim();
@@ -111,9 +111,8 @@
   function normalizeScope(value, providerId) {
     const source = typeof value === "string" ? { raw: value } : Object.assign({}, value || {});
     const decoded = decodeScope(source.id || source.raw || source.label || "");
-    const lowered = decoded.toLowerCase();
-    let id = aliases[decoded] || aliases[lowered] || providerPrefix(providerId, lowered);
-    if (lowered.startsWith("https://www.googleapis.com/auth/")) id = aliases[lowered] || "google." + lowered.replace("https://www.googleapis.com/auth/", "");
+    let id = aliases[decoded] || providerPrefix(providerId, decoded);
+    if (decoded.startsWith("https://www.googleapis.com/auth/")) id = aliases[decoded] || "google." + decoded.replace("https://www.googleapis.com/auth/", "");
     if (providerId === "github" && !id.includes(".") && aliases[id]) id = aliases[id];
     if (providerId === "gitlab" && !id.includes(".") && aliases[id]) id = aliases[id];
     if (!catalog[id] && providerId && providerId !== "generic" && !id.startsWith(providerId + ".") && !["openid", "profile", "email", "offline_access"].includes(id)) id = providerId + "." + id;
