@@ -82,7 +82,7 @@
     sudo: "gitlab.sudo"
   };
   function splitScopeText(value) {
-    return String(value || "").split(/\s+/).map((part) => part.trim()).filter(Boolean);
+    return String(value || "").split(/[\s,+]+/).map((part) => part.trim()).filter(Boolean);
   }
   function providerPrefix(providerId, value) {
     if ((providerId === "github" || providerId === "gitlab" || providerId === "google") && aliases[value]) return aliases[value];
