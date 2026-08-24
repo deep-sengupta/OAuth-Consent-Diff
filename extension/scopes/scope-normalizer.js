@@ -84,14 +84,6 @@
   function splitScopeText(value) {
     return String(value || "").split(/\s+/).map((part) => part.trim()).filter(Boolean);
   }
-  function decodeScope(value) {
-    const raw = String(value || "").trim();
-    try {
-      return decodeURIComponent(raw).trim();
-    } catch (error) {
-      return raw;
-    }
-  }
   function providerPrefix(providerId, value) {
     if ((providerId === "github" || providerId === "gitlab" || providerId === "google") && aliases[value]) return aliases[value];
     return value;
@@ -110,19 +102,19 @@
   }
   function normalizeScope(value, providerId) {
     const source = typeof value === "string" ? { raw: value } : Object.assign({}, value || {});
-    const decoded = decodeScope(source.id || source.raw || source.label || "");
-    let id = aliases[decoded] || providerPrefix(providerId, decoded);
-    if (decoded.startsWith("https://www.googleapis.com/auth/")) id = aliases[decoded] || "google." + decoded.replace("https://www.googleapis.com/auth/", "");
-    if (providerId === "github" && !id.includes(".") && aliases[id]) id = aliases[id];
-    if (providerId === "gitlab" && !id.includes(".") && aliases[id]) id = aliases[id];
-    if (!catalog[id] && providerId && providerId !== "generic" && !id.startsWith(providerId + ".") && !["openid", "profile", "email", "offline_access"].includes(id)) id = providerId + "." + id;
-    const known = catalog[id];
-    if (known) return Object.assign({}, known, { raw: source.raw || decoded, seenAs: source.seenAs || source.raw || decoded, known: true });
-    const fallbackId = id || "unknown";
+    const id = String(source.id || source.raw || source.label || "").trim();
+    let normalizedId = aliases[id] || providerPrefix(providerId, id);
+    if (id.startsWith("https://www.googleapis.com/auth/")) normalizedId = aliases[id] || "google." + id.replace("https://www.googleapis.com/auth/", "");
+    if (providerId === "github" && !normalizedId.includes(".") && aliases[normalizedId]) normalizedId = aliases[normalizedId];
+    if (providerId === "gitlab" && !normalizedId.includes(".") && aliases[normalizedId]) normalizedId = aliases[normalizedId];
+    if (!catalog[normalizedId] && providerId && providerId !== "generic" && !normalizedId.startsWith(providerId + ".") && !["openid", "profile", "email", "offline_access"].includes(normalizedId)) normalizedId = providerId + "." + normalizedId;
+    const known = catalog[normalizedId];
+    if (known) return Object.assign({}, known, { raw: source.raw || id, seenAs: source.seenAs || source.raw || id, known: true });
+    const fallbackId = normalizedId || "unknown";
     return {
       id: fallbackId,
-      raw: source.raw || decoded || fallbackId,
-      seenAs: source.seenAs || source.raw || decoded || fallbackId,
+      raw: source.raw || id || fallbackId,
+      seenAs: source.seenAs || source.raw || id || fallbackId,
       provider: providerId || "generic",
       label: "Unverified OAuth scope",
       category: "Unverified OAuth scope",
