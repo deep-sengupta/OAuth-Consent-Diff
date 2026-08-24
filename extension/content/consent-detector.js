@@ -28,11 +28,13 @@
     if (!provider) return null;
     const rawScopes = provider.extractScopes ? provider.extractScopes(doc, context) : [];
     if (!rawScopes.length && provider.id !== "generic") return null;
+    const clientId = provider.extractClientId ? provider.extractClientId(context) : "";
+    if (provider.id !== "generic" && !clientId) return null;
     return {
       providerId: provider.id,
       providerLabel: provider.label,
       appName: provider.extractAppName ? provider.extractAppName(doc, context) : "OAuth app",
-      clientId: provider.extractClientId ? provider.extractClientId(context) : "",
+      clientId,
       url: context.url,
       host: context.host,
       title: context.title,
