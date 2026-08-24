@@ -7,7 +7,6 @@
   const OBSERVATIONS = "observations";
   const SETTINGS = "settings";
   let openPromise;
-
   function openDB() {
     if (!root.indexedDB) return Promise.reject(new Error("IndexedDB is not available"));
     if (openPromise) return openPromise;
@@ -29,7 +28,6 @@
     });
     return openPromise;
   }
-
   function requestToPromise(request) {
     return new Promise((resolve, reject) => {
       request.onsuccess = () => resolve(request.result);
@@ -54,7 +52,6 @@
     const db = await openDB();
     return requestToPromise(db.transaction(storeName, "readonly").objectStore(storeName).getAll());
   }
-
   function authorizationContext(input) {
     const value = input || {};
     try {
@@ -64,22 +61,26 @@
       return value.host || "unknown-endpoint";
     }
   }
-
   function appKey(input) {
     const value = input || {};
     const providerId = value.providerId || value.provider || "generic";
     const clientId = value.clientId || value.appId || "unknown-client";
     const endpoint = authorizationContext(value);
-    const identity = clientId + "@" + endpoint;
-    return providerId + ":" + (utils.compactKey ? utils.compactKey(identity) : String(identity).toLowerCase());
+    const identity = providerId + "\u0000" + clientId + "\u0000" + endpoint;
+    return "oauth-profile:" + encodeURIComponent(identity);
   }
-
+  function consentFingerprint(input, scopes) {
+    const value = input || {};
+    const providerId = value.providerId || value.provider || "generic";
+    const clientIdentity = value.clientId || value.appName || "";
+    const scopeKey = (scopes || []).map((scope) => scope && scope.id ? scope.id : "").sort();
+    return JSON.stringify([providerId, clientIdentity, authorizationContext(value), scopeKey]);
+  }
   function uniqueScopeRecords(records) {
     const map = new Map();
     for (const scope of records || []) if (scope && scope.id && !map.has(scope.id)) map.set(scope.id, scope);
     return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
   }
-
   function emptyProfile(input) {
     const key = typeof input === "string" ? input : appKey(input);
     const source = typeof input === "string" ? {} : input || {};
@@ -104,7 +105,6 @@
       maxRisk: "low"
     };
   }
-
   async function getProfile(input) {
     const key = typeof input === "string" ? input : appKey(input);
     const stored = await getStoreValue(PROFILES, key);
@@ -115,7 +115,6 @@
       decisionCounts: Object.assign({ approved: 0, rejected: 0, ignored: 0 }, stored.decisionCounts || {})
     });
   }
-
   async function saveObservation(input) {
     const context = input.context || input;
     const key = appKey(context);
@@ -172,7 +171,6 @@
     });
     return { profile, observation };
   }
-
   async function recordDecision(input) {
     const context = input.context || input;
     const decision = String(input.decision || "").toLowerCase();
@@ -183,6 +181,13 @@
     const currentScopes = uniqueScopeRecords(input.currentScopes || input.scopes || []);
     const observationId = input.observationId || "";
     const counts = Object.assign({ approved: 0, rejected: 0, ignored: 0 }, existing.decisionCounts || {});
+    if (!input.fingerprint) throw new Error("Consent fingerprint required");
+    if (input.fingerprint !== consentFingerprint(context, currentScopes)) throw new Error("Consent fingerprint mismatch");
+    if (!observationId) throw new Error("Observation required for decision");
+    const observation = await getStoreValue(OBSERVATIONS, observationId);
+    if (!observation || observation.profileKey !== key) throw new Error("Invalid consent observation");
+    if (observation.observedAt !== existing.lastSeen) throw new Error("Consent state is stale");
+    if (input.fingerprint !== consentFingerprint(observation, observation.scopes || [])) throw new Error("Consent observation mismatch");
     counts[decision] += 1;
     const profile = Object.assign({}, existing, { lastDecision: decision, lastDecisionAt: now, decisionCounts: counts });
     if (decision === "approved" && (!(existing.trustedScopes || []).length || input.updateBaseline === true)) {
@@ -195,25 +200,22 @@
     await new Promise((resolve, reject) => {
       const tx = db.transaction([PROFILES, OBSERVATIONS], "readwrite");
       tx.objectStore(PROFILES).put(profile);
-      if (observationId) {
-        const store = tx.objectStore(OBSERVATIONS);
-        const request = store.get(observationId);
-        request.onsuccess = () => {
-          const observation = request.result;
-          if (observation && observation.profileKey === key) {
-            observation.decision = decision;
-            observation.decidedAt = now;
-            store.put(observation);
-          }
-        };
-      }
+      const store = tx.objectStore(OBSERVATIONS);
+      const request = store.get(observationId);
+      request.onsuccess = () => {
+        const currentObservation = request.result;
+        if (currentObservation && currentObservation.profileKey === key) {
+          currentObservation.decision = decision;
+          currentObservation.decidedAt = now;
+          store.put(currentObservation);
+        }
+      };
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
       tx.onabort = () => reject(tx.error);
     });
     return profile;
   }
-
   async function listRecent(limit) {
     const rows = await getAll(OBSERVATIONS);
     const sorted = rows.sort((a, b) => String(b.observedAt).localeCompare(String(a.observedAt)));
@@ -247,7 +249,6 @@
     const current = await getSettings();
     return putStoreValue(SETTINGS, Object.assign({}, current, settings || {}, { key: "main" }));
   }
-
   app.historyDB = { openDB, appKey, getProfile, saveObservation, recordDecision, listRecent, getStats, clearAll, getSettings, saveSettings };
   root.OAuthConsentDiff = app;
   if (typeof module !== "undefined" && module.exports) module.exports = app.historyDB;
